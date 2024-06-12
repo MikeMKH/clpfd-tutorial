@@ -37,6 +37,13 @@ test(puzzle, all(As=[[9, 5, 6, 7]])) :-
   assertion(Bs ==    [1, 0, 8, 5]),
   assertion(Cs == [1, 0, 6, 5, 2]).
 
+test(removing_symmetry) :-
+  Vs = [A,B,C,D], Vs ins 1..4,
+  all_different(Vs),
+  A #< B, C #< D, A #< C,
+  findall(pair(A,B)-pair(C,D), label(Vs), Ms),
+  assertion(Ms == [pair(1, 2)-pair(3, 4), pair(1, 3)-pair(2, 4), pair(1, 4)-pair(2, 3)]).
+
 :- end_tests(clpfd_tutorial).
 :- run_tests.
 
@@ -115,3 +122,27 @@ puzzle2([S,U,N] + [F,U,N] = [S,W,I,M]) :-
 % Bs = [8, 7, 6],
 % Cs = [1, 0, 5, 2] ;
 % false.
+
+increase([]).
+increase([_]).
+increase([A, B | T]) :-
+  A #< B,
+  increase(T).
+
+% ?- increase([1, X, 3]).
+% X in 2..sup ;
+% false.
+
+% ?- increase([1, X, 4]).
+% X in 2..sup ;
+% false.
+
+% ?- increase([1, X, Y, 4]).
+% X in 2..sup,
+% Y in inf..3.
+
+% ?- increase([1, 2]).
+% true.
+
+% ?- increase([1, X]).
+% X in 2..sup.
