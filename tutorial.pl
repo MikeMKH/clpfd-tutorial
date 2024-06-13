@@ -63,6 +63,22 @@ test(chem_demo_startup_valid_temp) :-
 test(chem_demo_startup_invalid_temp) :-
   assertion(\+ chem_demo(801, 11, 1)).
 
+% ?- length(List, 4),List ins 1..4, all_different(List), List = [1,_,3,4].
+% List = [1, 2, 3, 4].
+
+% ?- X in 1..2, Y in 1..2, Z in 1..2, all_different([X,Y,Z]).
+% X in 1..2,
+% all_different([X, Y, Z]),
+% Y in 1..2,
+% Z in 1..2.
+
+% ?- X in 1..2, Y in 1..2, Z in 1..2, all_distinct([X,Y,Z]).
+% false.
+
+test(all_distinct_impossible_values) :-
+  X in 1..2, Y in 1..2, Z in 1..2,
+  assertion(\+ all_distinct([X,Y,Z])).
+
 :- end_tests(clpfd_tutorial).
 :- run_tests.
 
