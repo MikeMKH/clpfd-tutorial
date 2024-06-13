@@ -44,6 +44,25 @@ test(removing_symmetry) :-
   findall(pair(A,B)-pair(C,D), label(Vs), Ms),
   assertion(Ms == [pair(1, 2)-pair(3, 4), pair(1, 3)-pair(2, 4), pair(1, 4)-pair(2, 3)]).
 
+chem_tank(Temp, Startup) :-
+  Temp #< 800,
+  #\ Startup #==> Temp #> 300.
+
+chem_demo(Temp, TimeNow, StartTime) :-
+  chem_tank(Temp, TimeNow - StartTime #< 10).
+
+test(chem_demo_startup_valid_temp) :-
+  assertion(chem_demo(299, 2, 1)).
+
+test(chem_demo_startup_invalid_temp) :-
+  assertion(\+ chem_demo(801, 2, 1)).
+
+test(chem_demo_startup_valid_temp) :-
+  assertion(chem_demo(301, 11, 1)).
+
+test(chem_demo_startup_invalid_temp) :-
+  assertion(\+ chem_demo(801, 11, 1)).
+
 :- end_tests(clpfd_tutorial).
 :- run_tests.
 
