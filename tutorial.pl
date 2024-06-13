@@ -79,6 +79,35 @@ test(all_distinct_impossible_values) :-
   X in 1..2, Y in 1..2, Z in 1..2,
   assertion(\+ all_distinct([X,Y,Z])).
 
+trains([
+  % from station, to station, departs at, arrives at
+  [1,2,0,1],
+  [2,3,4,5],
+  [2,3,0,1],
+  [3,4,5,6],
+  [3,4,2,3],
+  [3,4,8,9]]).
+
+threepath(A, D, Ps) :-
+  Ps = [[A,B,_T0,T1],[B,C,T2,T3],[C,D,T4,_T5]],
+  T2 #> T1,
+  T4 #> T3,
+  trains(Ts),
+  tuples_in(Ps, Ts).
+
+test(threepath_1_4) :-
+  threepath(1, 4, Ps),
+  assertion(Ps == [[1, 2, 0, 1], [2, 3, 4, 5], [3, 4, 8, 9]]).
+
+% npath(_A, _D, 0, Ps).
+% npath(A, D, N, Ps) :-
+%   N1 #= N - 1,
+%   append([[A,B,_T0,T1], [B,C,T2,_T3]], Ps, Ps1),
+%   T2 #> T1,
+%   npath(C, D, N1, Ps1),
+%   trains(Ts),
+%   tuples_in(Ps1, Ts).
+
 :- end_tests(clpfd_tutorial).
 :- run_tests.
 
