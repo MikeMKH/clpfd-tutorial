@@ -99,19 +99,28 @@ test(threepath_1_4) :-
   threepath(1, 4, Ps),
   assertion(Ps == [[1, 2, 0, 1], [2, 3, 4, 5], [3, 4, 8, 9]]).
 
-% npath(A, D, Ps) :-
-%   trains(Ts),
-%   member([A,B,T0,T1], Ts),
-%   npath(A, D, [[A,B,T0,T1]], Ps).
-% npath(D, D, Ps, Ps).
-% npath(A, D, Ps0, Ps) :-
-%   A #< D,
-%   last(Ps0, [A,B,_T0,T1]),
-%   append(Ps0, [[B,C,T2,_T3]], Ps1),
-%   T2 #> T1,
-%   trains(Ts),
-%   tuples_in(Ps1, Ts),
-%   npath(C, D, Ps1, Ps).
+npath(A, D, Ps) :-
+  trains(Ts),
+  member([A,B,T0,T1], Ts),
+  npath(B, D, [[A,B,T0,T1]], Ps).
+npath(D, D, Ps, Ps).
+npath(B, D, Ps0, Ps) :-
+  B #< D,
+  last(Ps0, [_A,B,_T0,T1]),
+  append(Ps0, [[B,C,T2,T3]], Ps1),
+  T2 #> T1,
+  trains(Ts),
+  member([B,C,T2,T3], Ts),
+  npath(C, D, Ps1, Ps).
+
+test(npath_1_4, all(Ps=[[[1, 2, 0, 1], [2, 3, 4, 5], [3, 4, 8, 9]]])) :-
+  npath(1, 4, Ps),
+  assertion(Ps == [[1, 2, 0, 1], [2, 3, 4, 5], [3, 4, 8, 9]]).
+
+test(threepath_1_4_eq_npath_1_4, all(Ns=[[[1, 2, 0, 1], [2, 3, 4, 5], [3, 4, 8, 9]]])) :-
+  npath(1, 4, Ns),
+  threepath(1, 4, Ts),
+  assertion(Ns == Ts).
 
 :- end_tests(clpfd_tutorial).
 :- run_tests.
