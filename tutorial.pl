@@ -99,12 +99,18 @@ test(threepath_1_4) :-
   threepath(1, 4, Ps),
   assertion(Ps == [[1, 2, 0, 1], [2, 3, 4, 5], [3, 4, 8, 9]]).
 
-% npath(A, D, Ps) :- npath(A, D, [], Ps), trains(Ts), tuples_in(Ps, Ts).
+% npath(A, D, Ps) :-
+%   trains(Ts),
+%   member([A,B,T0,T1], Ts),
+%   npath(A, D, [[A,B,T0,T1]], Ps).
 % npath(D, D, Ps, Ps).
 % npath(A, D, Ps0, Ps) :-
 %   A #< D,
-%   append(Ps0, [[A,B,_T0,T1], [B,C,T2,_T3]], Ps1),
+%   last(Ps0, [A,B,_T0,T1]),
+%   append(Ps0, [[B,C,T2,_T3]], Ps1),
 %   T2 #> T1,
+%   trains(Ts),
+%   tuples_in(Ps1, Ts),
 %   npath(C, D, Ps1, Ps).
 
 :- end_tests(clpfd_tutorial).
@@ -301,3 +307,21 @@ increase([A, B | T]) :-
   % 13/9/15/7/
   % 10/14/11/16/
   % Class = [[1, 2, 3, 5], [4, 12, 6, 8], [13, 9, 15, 7], [10, 14, 11, 16]] .
+  
+% ?- X in 0..10, Y in 11..20,zcompare(C, X, Y).
+% C = (<),
+% X in 0..10,
+% Y in 11..20.
+
+% ?- X in 0..11, Y in 11..20,zcompare(C, X, Y).
+% X in 0..11,
+% zcompare(C, X, Y),
+% Y in 11..20,
+% freeze(C, clpfd:zcompare_(C, X, Y)).
+
+% ?- X in 0..11, Y in 11..20,zcompare(C, X, Y),C = (<).
+% C = (<),
+% X in 0..11,
+% X#=<Y+ -1,
+% zcompare(<, X, Y),
+% Y in 11..20.
