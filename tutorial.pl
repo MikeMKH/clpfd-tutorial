@@ -122,6 +122,55 @@ test(threepath_1_4_eq_npath_1_4, all(Ns=[[[1, 2, 0, 1], [2, 3, 4, 5], [3, 4, 8, 
   threepath(1, 4, Ts),
   assertion(Ns == Ts).
 
+% from https://github.com/Anniepoo/swiplclpfd/blob/master/clpfd.adoc#12-resources
+%  penny candy example
+%
+%  Timmy has 25 cents
+%  gumballs cost a penny
+%  snickers cost 10 cents
+%  toffees are 2 cents
+%  licorice costs 5 cents
+%
+%  what are Timmys alternatives?
+%  assume Timmy spends the entire 25 cents
+penny_candy_example(Candy) :-
+	Candy = [_Gumball, _Snickers, _Toffee, _Licorice],
+	Candy ins 0..sup,
+	scalar_product([1, 10, 2, 5], Candy, #=, 25),
+	label(Candy).
+
+% ?- penny_candy_example([Gumball, Snickers, Toffee, Licorice]).
+% Gumball = Snickers, Snickers = Toffee, Toffee = 0,
+% Licorice = 5 ;
+% Gumball = Snickers, Snickers = 0,
+% Toffee = 5,
+% Licorice = 3 ;
+% Gumball = Snickers, Snickers = 0,
+% Toffee = 10,
+% Licorice = 1 ;
+% Gumball = Toffee, Toffee = 0,
+% Snickers = 1,
+% Licorice = 3 .
+%
+% and so ...
+
+test(penny_candy_example_licorice_is_5, all(Licorice = [5])) :-
+  penny_candy_example([Gumball, Snickers, Toffee, Licorice]),
+  Licorice=5,
+  assertion(Licorice =:= 5),
+  assertion(Gumball =:= 0),
+  assertion(Snickers =:= 0),
+  assertion(Toffee =:= 0).
+
+test(penny_candy_example_snickers_is_2_licorice_is_1, all([Snickers, Licorice] = [[2, 1]])) :-
+  penny_candy_example([Gumball, Snickers, Toffee, Licorice]),
+  Snickers=2,
+  Licorice=1,
+  assertion(Snickers =:= 2),
+  assertion(Licorice =:= 1),
+  assertion(Gumball =:= 0),
+  assertion(Toffee =:= 0).
+
 :- end_tests(clpfd_tutorial).
 :- run_tests.
 
