@@ -216,17 +216,6 @@ test(demo_multi_source_automaton_path2, all(Vs = [[10,10,11,12]])) :-
   Vs == [10,10,11,12],
   assertion(Vs == [10,10,11,12]).
 
-% binary_divisible_by_2_automaton(Bs) :-
-%   automaton(Bs, [source(a), sink(c)],
-%     [arc(a, 1, b),
-%      arc(b, 0, a),
-%      arc(b, 1, b),
-%      arc(a, 0, c)]).
-
-% binary_divisible_by_2(Bs) :-
-%  binary_divisible_by_2_automaton(Bs),
-%  label(Bs).
-
 :- end_tests(clpfd_tutorial).
 :- run_tests.
 
@@ -622,3 +611,41 @@ flirty_period(Period, Suzy, Nathan, John) :-
 % Vs = [2, 3, 4, 5, 1] ;
 % Vs = [2, 3, 5, 1, 4] .
 % ... and so on
+
+binary_divisible_by_2(Bs) :-
+  automaton(Bs, [source(a), sink(a)],
+    [arc(a, 1, b),
+     arc(b, 0, a),
+     arc(b, 1, b),
+     arc(a, 0, a)]).
+    
+% ?- binary_divisible_by_2([1,0]).
+% true.
+% 
+% ?- binary_divisible_by_2([0,1]).
+% false.
+% 
+% ?- binary_divisible_by_2([1,1]).
+% false.
+% 
+% ?- binary_divisible_by_2([0]).
+% true.
+% 
+% ?- binary_divisible_by_2([1]).
+% false.
+% 
+% ?- binary_divisible_by_2([0,0,1,0]).
+% true.
+% 
+% ?- binary_divisible_by_2([1,1,1,0]).
+% true.
+
+% ?- length(Bs, 4), binary_divisible_by_2(Bs), label(Bs).
+% Bs = [0, 0, 0, 0] ;
+% Bs = [0, 0, 1, 0] ;
+% Bs = [0, 1, 0, 0] ;
+% Bs = [0, 1, 1, 0] ;
+% Bs = [1, 0, 0, 0] ;
+% Bs = [1, 0, 1, 0] ;
+% Bs = [1, 1, 0, 0] ;
+% Bs = [1, 1, 1, 0].
