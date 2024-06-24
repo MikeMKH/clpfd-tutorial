@@ -171,6 +171,62 @@ test(penny_candy_example_snickers_is_2_licorice_is_1, all([Snickers, Licorice] =
   assertion(Gumball =:= 0),
   assertion(Toffee =:= 0).
 
+% from https://github.com/Anniepoo/swiplclpfd/blob/master/clpfd.adoc#135-automaton
+single_source_automaton(Vs) :-
+  automaton(Vs, [source(a), sink(d)],
+    [arc(a, 0, b),
+     arc(b, 0, b),
+     arc(b, 1, c),
+     arc(c, 2, d)
+    ]).
+
+demo_single_source(Vs) :-
+  length(Vs, 4),
+  single_source_automaton(Vs),
+  label(Vs).
+
+test(demo_single_source) :-
+  demo_single_source(Vs),
+  assertion(Vs == [0, 0, 1, 2]).
+
+% from https://github.com/Anniepoo/swiplclpfd/blob/master/clpfd.adoc#135-automaton
+multi_source_automaton(Vs) :-
+  automaton(Vs, [source(a), source(e), sink(d), sink(h)],
+      [arc(a,0,b),
+       arc(b,0,b),
+       arc(b,1,c),
+       arc(c,2,d),
+       arc(e,10,f),
+       arc(f,10,f),
+       arc(f,11,g),
+       arc(g,12,h)]).
+
+demo_multi_source_automaton(Vs) :-
+  length(Vs, 4),
+  multi_source_automaton(Vs),
+  label(Vs).
+
+test(demo_multi_source_automaton_path1, all(Vs = [[0,0,1,2]])) :-
+  demo_multi_source_automaton(Vs),
+  Vs == [0,0,1,2],
+  assertion(Vs == [0,0,1,2]).
+
+test(demo_multi_source_automaton_path2, all(Vs = [[10,10,11,12]])) :-
+  demo_multi_source_automaton(Vs),
+  Vs == [10,10,11,12],
+  assertion(Vs == [10,10,11,12]).
+
+% binary_divisible_by_2_automaton(Bs) :-
+%   automaton(Bs, [source(a), sink(c)],
+%     [arc(a, 1, b),
+%      arc(b, 0, a),
+%      arc(b, 1, b),
+%      arc(a, 0, c)]).
+
+% binary_divisible_by_2(Bs) :-
+%  binary_divisible_by_2_automaton(Bs),
+%  label(Bs).
+
 :- end_tests(clpfd_tutorial).
 :- run_tests.
 
@@ -383,3 +439,186 @@ increase([A, B | T]) :-
 % X#=<Y+ -1,
 % zcompare(<, X, Y),
 % Y in 11..20.
+
+% ?- chain([A,B,C,D], #>=).
+% A#>=B,
+% B#>=C,
+% C#>=D.
+
+% ?- chain([5,B,C,4], #>=).
+% B in 4..5,
+% B#>=C,
+% C in 4..5.
+
+% ?- chain([5,B,4,D], #>=).
+% B in 4..5,
+% D in inf..4.
+
+% ?- lex_chain([[1],[B],[C],[6]]).
+% B in 1..6,
+% C#>=B,
+% lex_chain([[1], [B], [C], [6]]),
+% freeze(B, clpfd:lex_le([1], [B])),
+% freeze(B, clpfd:lex_le([B], [C])),
+% C in 1..6,
+% freeze(C, clpfd:lex_le([C], [6])).
+
+% from https://github.com/Anniepoo/swiplclpfd/blob/master/clpfd.adoc#133-elementindex-list-element
+% Suzy Flirting Example
+%
+% Suzy wants to flirt with Nathan
+% But not when her old boyfriend John is around
+%
+% Suzy, Nathan, and John all must take classes 1..6
+%
+% How can Suzy arrange her schedule so she can flirt
+% in at least 3 classes?
+
+flirt_constraint(Suzy, Nathan, John, FlirtPeriods) :-
+	length(Suzy, 6),
+	length(Nathan, 6),
+	length(John, 6),
+	Suzy ins 1..6,
+	Nathan ins 1..6,
+	John ins 1..6,
+	all_different(Suzy),
+	all_different(Nathan),
+	all_different(John),
+	FlirtPeriods = [A,B,C],
+	FlirtPeriods ins 1..6,
+	A #< B,    % remove unwanted symmetry
+	B #< C,
+	flirty_period(A, Suzy, Nathan, John),
+	flirty_period(B, Suzy, Nathan, John),
+	flirty_period(C, Suzy, Nathan, John),
+	label(Suzy),
+	label(FlirtPeriods).
+
+flirty_period(Period, Suzy, Nathan, John) :-
+	Class in 1..6,
+	DiffClass #\= Class,
+	element(Period, Suzy, Class),
+	element(Period, Nathan, Class),
+	element(Period, John, DiffClass).
+
+% ?- flirt_constraint(Suzy, Nathan, John, FlirtPeriods).
+% Suzy = [1, 2, 3, 4, 5, 6],
+% Nathan = [1, 2, 3, _A, _B, _C],
+% John = [_D, _E, _F, _G, _H, _I],
+% FlirtPeriods = [1, 2, 3],
+% _A in 4..6,
+% all_different([1, 2, 3, _A, _B, _C]),
+% _B in 4..6,
+% _C in 4..6,
+% _D in 2..6,
+% all_different([_D, _E, _F, _G, _H, _I]),
+% _E in 1\/3..6,
+% _F in 1..2\/4..6,
+% _G in 1..6,
+% _H in 1..6,
+% _I in 1..6 ;
+% Suzy = [1, 2, 3, 4, 5, 6],
+% Nathan = [1, 2, _A, 4, _B, _C],
+% John = [_D, _E, _F, _G, _H, _I],
+% FlirtPeriods = [1, 2, 4],
+% _A in 3\/5..6,
+% all_different([1, 2, _A, 4, _B, _C]),
+% _B in 3\/5..6,
+% _C in 3\/5..6,
+% _D in 2..6,
+% all_different([_D, _E, _F, _G, _H, _I]),
+% _E in 1\/3..6,
+% _F in 1..6,
+% _G in 1..3\/5..6,
+% _H in 1..6,
+% _I in 1..6 ;
+% Suzy = [1, 2, 3, 4, 5, 6],
+% Nathan = [1, 2, _A, _B, 5, _C],
+% John = [_D, _E, _F, _G, _H, _I],
+% FlirtPeriods = [1, 2, 5],
+% _A in 3..4\/6,
+% all_different([1, 2, _A, _B, 5, _C]),
+% _B in 3..4\/6,
+% _C in 3..4\/6,
+% _D in 2..6,
+% all_different([_D, _E, _F, _G, _H, _I]),
+% _E in 1\/3..6,
+% _F in 1..6,
+% _G in 1..6,
+% _H in 1..4\/6,
+% _I in 1..6 ;
+% Suzy = [1, 2, 3, 4, 5, 6],
+% Nathan = [1, 2, _A, _B, _C, 6],
+% John = [_D, _E, _F, _G, _H, _I],
+% FlirtPeriods = [1, 2, 6],
+% _A in 3..5,
+% all_different([1, 2, _A, _B, _C, 6]),
+% _B in 3..5,
+% _C in 3..5,
+% _D in 2..6,
+% all_different([_D, _E, _F, _G, _H, _I]),
+% _E in 1\/3..6,
+% _F in 1..6,
+% _G in 1..6,
+% _H in 1..6,
+% _I in 1..5 ;
+% Suzy = [1, 2, 3, 4, 5, 6],
+% Nathan = [1, _A, 3, 4, _B, _C],
+% John = [_D, _E, _F, _G, _H, _I],
+% FlirtPeriods = [1, 3, 4],
+% _A in 2\/5..6,
+% all_different([1, _A, 3, 4, _B, _C]),
+% _B in 2\/5..6,
+% _C in 2\/5..6,
+% _D in 2..6,
+% all_different([_D, _E, _F, _G, _H, _I]),
+% _E in 1..6,
+% _F in 1..2\/4..6,
+% _G in 1..3\/5..6,
+% _H in 1..6,
+% _I in 1..6 .
+% .. and so on
+
+% ?- circuit([A]).
+% A = 1.
+
+% ?- circuit([A,B]).
+% A = 2,
+% B = 1.
+
+% ?- circuit([A,B,C]).
+% A in 2..3,
+% circuit([A, B, C]),
+% B in 1\/3,
+% C in 1..2.
+
+% ?- circuit([A,B,C,D]).
+% A in 2..4,
+% circuit([A, B, C, D]),
+% B in 1\/3..4,
+% C in 1..2\/4,
+% D in 1..3.
+
+% ?- circuit([A,B,C,D,E]).
+% A in 2..5,
+% circuit([A, B, C, D, E]),
+% B in 1\/3..5,
+% C in 1..2\/4..5,
+% D in 1..3\/5,
+% E in 1..4.
+
+% ?- length(Vs, _), circuit(Vs), label(Vs).
+% Vs = [] ;
+% Vs = [1] ;
+% Vs = [2, 1] ;
+% Vs = [2, 3, 1] ;
+% Vs = [3, 1, 2] ;
+% Vs = [2, 3, 4, 1] ;
+% Vs = [2, 4, 1, 3] ;
+% Vs = [3, 1, 4, 2] ;
+% Vs = [3, 4, 2, 1] ;
+% Vs = [4, 1, 2, 3] ;
+% Vs = [4, 3, 1, 2] ;
+% Vs = [2, 3, 4, 5, 1] ;
+% Vs = [2, 3, 5, 1, 4] .
+% ... and so on
