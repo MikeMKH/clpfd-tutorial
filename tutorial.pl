@@ -649,3 +649,98 @@ binary_divisible_by_2(Bs) :-
 % Bs = [1, 0, 1, 0] ;
 % Bs = [1, 1, 0, 0] ;
 % Bs = [1, 1, 1, 0].
+
+% from https://github.com/Anniepoo/swiplclpfd/blob/master/clpfd.adoc#14-scheduling
+:- use_module(library(pairs)).
+
+my_schedule_today(Starts, Durations) :-
+  % unordered list of stuff to do today
+  Starts = [PrepForSmith, MeetWithSmith, _WriteDBInstaller, Lunch, _CallAlice, _ReadDocs],
+  % how long they'll take
+  Durations = [2, 1, 2, 1, 1, 1],
+  % hours in 24 hour format
+  % 6am to 4pm
+  Starts ins 6..16,
+  % lunch at 11am or noon
+  Lunch in 11 \/ 12,
+  % meeting with Smith is at 1pm
+  MeetWithSmith #= 13,
+  % prep before the meeting
+	PrepForSmith #< MeetWithSmith,
+  serialized(Starts, Durations).
+
+demo_my_schedule(Starts, Durations) :-
+	my_schedule_today(Starts, Durations),
+	append(Starts, Durations, Vars),
+	label(Vars),
+	pairs_keys_values(NameDurs ,
+       ['Prep for Smith', 'Meet With Smith', 'Write DB Installer', 'Lunch', 'Call Alice', 'Read Flubbercalc Docs'], Durations),
+	pairs_keys_values(Pairs, Starts, NameDurs),
+	keysort(Pairs, Sorted),
+	pairs_keys_values(Sorted, SortStarts, SortNameDurs),
+	print_sched(SortStarts, SortNameDurs).
+
+print_sched([], _).
+print_sched([Start | ST], [Name-Duration | T]) :-
+	format('~w: ~w  (~w hr)~n', [Start, Name, Duration]),
+	print_sched(ST, T).
+
+% ?- demo_my_schedule(Starts, Durations).
+% 6: Prep for Smith  (2 hr)
+% 8: Write DB Installer  (2 hr)
+% 10: Call Alice  (1 hr)
+% 11: Lunch  (1 hr)
+% 12: Read Flubbercalc Docs  (1 hr)
+% 13: Meet With Smith  (1 hr)
+% Starts = [6, 13, 8, 11, 10, 12],
+% Durations = [2, 1, 2, 1, 1, 1] ;
+% 6: Prep for Smith  (2 hr)
+% 8: Write DB Installer  (2 hr)
+% 10: Call Alice  (1 hr)
+% 11: Lunch  (1 hr)
+% 13: Meet With Smith  (1 hr)
+% 14: Read Flubbercalc Docs  (1 hr)
+% Starts = [6, 13, 8, 11, 10, 14],
+% Durations = [2, 1, 2, 1, 1, 1] ;
+% 6: Prep for Smith  (2 hr)
+% 8: Write DB Installer  (2 hr)
+% 10: Call Alice  (1 hr)
+% 11: Lunch  (1 hr)
+% 13: Meet With Smith  (1 hr)
+% 15: Read Flubbercalc Docs  (1 hr)
+% Starts = [6, 13, 8, 11, 10, 15],
+% Durations = [2, 1, 2, 1, 1, 1] ;
+% 6: Prep for Smith  (2 hr)
+% 8: Write DB Installer  (2 hr)
+% 10: Call Alice  (1 hr)
+% 11: Lunch  (1 hr)
+% 13: Meet With Smith  (1 hr)
+% 16: Read Flubbercalc Docs  (1 hr)
+% Starts = [6, 13, 8, 11, 10, 16],
+% Durations = [2, 1, 2, 1, 1, 1] ;
+% 6: Prep for Smith  (2 hr)
+% 8: Write DB Installer  (2 hr)
+% 10: Read Flubbercalc Docs  (1 hr)
+% 11: Lunch  (1 hr)
+% 12: Call Alice  (1 hr)
+% 13: Meet With Smith  (1 hr)
+% Starts = [6, 13, 8, 11, 12, 10],
+% Durations = [2, 1, 2, 1, 1, 1] .
+
+% ?- [X,Y] ins 1..3, labeling([max(X), min(Y)], [X,Y]).
+% X = 3,
+% Y = 1 ;
+% X = 3,
+% Y = 2 ;
+% X = Y, Y = 3 ;
+% X = 2,
+% Y = 1 ;
+% X = Y, Y = 2 ;
+% X = 2,
+% Y = 3 ;
+% X = Y, Y = 1 ;
+% X = 1,
+% Y = 2 ;
+% X = 1,
+% Y = 3 ;
+% false.
