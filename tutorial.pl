@@ -744,3 +744,16 @@ print_sched([Start | ST], [Name-Duration | T]) :-
 % X = 1,
 % Y = 3 ;
 % false.
+
+% from https://github.com/Anniepoo/swiplclpfd/blob/master/clpfd.adoc#17-debugging-and-testing
+dom_integers(D, Is) :- phrase(dom_integers_(D), Is).
+
+dom_integers_(I)      --> { integer(I) }, [I].
+dom_integers_(L..U)   --> { numlist(L, U, Is) }, Is.
+dom_integers_(D1\/D2) --> dom_integers_(D1), dom_integers_(D2).
+
+% ?- X in 1..5, X #\= 4, fd_dom(X, D), dom_integers(D, Is).
+% D = 1..3\/5,
+% Is = [1, 2, 3, 5],
+% X in 1..3\/5.
+
