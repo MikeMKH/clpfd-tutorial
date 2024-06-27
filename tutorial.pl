@@ -757,3 +757,39 @@ dom_integers_(D1\/D2) --> dom_integers_(D1), dom_integers_(D2).
 % Is = [1, 2, 3, 5],
 % X in 1..3\/5.
 
+% ?- X in 0..10, Y in 0..5, X #< Y, copy_term(foo(X,Y), foo(XA, YA)), YA = 3.
+% YA = 3,
+% X in 0..4,
+% X#=<Y+ -1,
+% Y in 1..5,
+% XA in 0..2.
+
+% ?- X in 0..10, Y in 0..5, X #< Y, copy_term(foo(X,Y), foo(XA, YA)), XA = 3.
+% XA = 3,
+% X in 0..4,
+% X#=<Y+ -1,
+% Y in 1..5,
+% YA in 4..5.
+
+% ?- X in 0..10, Y in 0..5, X #< Y, copy_term([Y], [YA]), YA = 3.
+% YA = 3,
+% X in 0..4,
+% X#=<Y+ -1,
+% Y in 1..5.
+
+% ?- X in 0..10, Y in 0..5, X #< Y, copy_term([Y], [YA]), X = 3.
+% X = 3,
+% Y in 4..5,
+% YA in 1..5,
+% _A#=<YA+ -1,
+% _A in 0..4.
+
+% ?- X in 1..3, Y #= X + 2, copy_term([X], [X1]), Y #= 3.
+% X = 1,
+% Y = 3,
+% X1 in 1..3,
+% X1+2#=_A,
+% _A in 3..5.
+
+% ?- X in 1..3, Y #= X + 2, copy_term([X], [X1]), Y #= 3, X1 == 1.
+% false.
