@@ -216,6 +216,82 @@ test(demo_multi_source_automaton_path2, all(Vs = [[10,10,11,12]])) :-
   Vs == [10,10,11,12],
   assertion(Vs == [10,10,11,12]).
 
+% from https://github.com/Anniepoo/swiplclpfd/blob/master/clpfd.adoc#19-making-your-own-constraints
+:- multifile clpfd:run_propagator/2.
+
+even(X) :-
+  clpfd:make_propagator(even(X), Prop),
+  clpfd:init_propagator(X, Prop),
+  clpfd:trigger_once(Prop).
+
+clpfd:run_propagator(even(X), MState) :-
+  (   integer(X) -> clpfd:kill(MState), 0 is X mod 2
+  ;   true
+  ).
+
+test(even_2) :-
+  assertion(even(2)).
+
+test(even_4) :-
+  assertion(even(4)).
+
+test(even_contraint) :-
+  even(X),
+  X + 3 #= 7,
+  assertion(X =:= 4).
+
+fizz(X) :-
+  clpfd:make_propagator(fizz(X), Prop),
+  clpfd:init_propagator(X, Prop),
+  clpfd:trigger_once(Prop).
+
+clpfd:run_propagator(fizz(X), MState) :-
+  (   integer(X) -> clpfd:kill(MState), 0 is X mod 3
+  ;   true
+  ).
+
+buzz(X) :-
+  clpfd:make_propagator(buzz(X), Prop),
+  clpfd:init_propagator(X, Prop),
+  clpfd:trigger_once(Prop).
+
+clpfd:run_propagator(buzz(X), MState) :-
+  (   integer(X) -> clpfd:kill(MState), 0 is X mod 5
+  ;   true
+  ).
+
+% ?- findall(N, (N in 0..100, indomain(N), fizz(N)), Ns).
+% Ns = [0, 3, 6, 9, 12, 15, 18, 21, 24|...].
+
+% ?- findall(N, (N in 0..100, indomain(N), buzz(N)), Ns).
+% Ns = [0, 5, 10, 15, 20, 25, 30, 35, 40|...].
+
+test(fizz_3) :-
+  assertion(fizz(3)).
+
+test(fizz_33) :-
+  assertion(fizz(33)).
+
+test(buzz_5) :-
+  assertion(buzz(5)).
+
+test(buzz_55) :-
+  assertion(buzz(55)).
+
+test(fizz_buzz_15) :-
+  assertion(fizz(15)),
+  assertion(buzz(15)).
+
+test(fizz_buzz_45) :-
+  assertion(fizz(45)),
+  assertion(buzz(45)).
+
+test(fizz_buzz_computation) :-
+  X #> 30, X #< 50,
+  fizz(X), buzz(X),
+  X = 45,
+  assertion(X =:= 45).
+
 :- end_tests(clpfd_tutorial).
 :- run_tests.
 
@@ -793,3 +869,17 @@ dom_integers_(D1\/D2) --> dom_integers_(D1), dom_integers_(D2).
 
 % ?- X in 1..3, Y #= X + 2, copy_term([X], [X1]), Y #= 3, X1 == 1.
 % false.
+
+% ?- X in 1..3, Y #= X + 2, copy_term([X], [X1]), Y #= 3, X \== X1.
+% X = 1,
+% Y = 3,
+% X1 in 1..3,
+% X1+2#=_A,
+% _A in 3..5.
+
+% ?- X in 1..3, Y #= X + 2, X \== X1, copy_term([X], [X1]), Y #= 3, X == X1.
+% false.
+
+% ?- X in 1..3, Y #= X + 2, Y #= 3,  X \== X1, copy_term([X], [X1]), X == X1.
+% X = X1, X1 = 1,
+% Y = 3.
